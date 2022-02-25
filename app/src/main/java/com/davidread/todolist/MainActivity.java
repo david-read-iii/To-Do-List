@@ -1,15 +1,24 @@
 package com.davidread.todolist;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
+
+    /**
+     * Int identifier for a request permissions result for external storage write access.
+     */
+    private final int REQUEST_WRITE_CODE = 0;
 
     /**
      * {@link ToDoList} used to get to-dos from persistent storage and save to-dos to persistent
@@ -73,6 +82,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Invoked after each {@link #requestPermissions(String[], int)} call.
+     *
+     * @param requestCode  The request code passed in {@link #requestPermissions(String[], int)}.
+     * @param permissions  The requested permissions.
+     * @param grantResults The grant results for the corresponding permissions.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        /* If the result is from a request to write to external storage and the permission was
+         * granted, then attempt to write to the Downloads directory again. */
+        if (requestCode == REQUEST_WRITE_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                downloadButtonClick(null);
+            }
+        }
+    }
+
+    /**
      * Method invoked when the add {@link android.widget.Button} is clicked. It registers the
      * text in {@link #mItemEditText} as a to-do with {@link #mToDoList}.
      */
@@ -93,6 +122,31 @@ public class MainActivity extends AppCompatActivity {
     public void clearButtonClick(View view) {
         mToDoList.clear();
         displayList();
+    }
+
+    /**
+     * Method invoked when the download {@link android.widget.Button} is clicked. It takes all
+     * to-dos stored in {@link #mToDoList} and puts them in a file in the device's external
+     * storage Downloads directory.
+     */
+    public void downloadButtonClick(View view) {
+        if (PermissionsUtil.hasPermissions(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                R.string.write_rationale,
+                REQUEST_WRITE_CODE
+        )) {
+            try {
+                if (mToDoList.downloadFile()) {
+                    Toast.makeText(this, R.string.download_successful, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, R.string.download_failed, Toast.LENGTH_LONG).show();
+                }
+            } catch (IOException e) {
+                Toast.makeText(this, R.string.download_failed, Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
