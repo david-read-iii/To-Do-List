@@ -59,9 +59,17 @@
         android:layout_height="wrap_content"
         android:onClick="clearButtonClick"
         android:text="@string/clear"
-        android:textColor="@color/green_800"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <!-- "Download" Button. -->
+    <Button
+        android:id="@+id/download_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="downloadButtonClick"
+        android:text="@string/download"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
